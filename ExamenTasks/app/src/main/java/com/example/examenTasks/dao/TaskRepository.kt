@@ -15,6 +15,11 @@ class TaskRepository(private val noteDAO: TaskDAO) {
         DeleteAsyncTask(noteDAO).execute(task)
     }
 
+    fun deleteAllTask():Boolean {
+        return DeleteAllAsyncTask(noteDAO).execute().get()
+    }
+
+
     fun updateTask(task: Task) {
         UpdateAsyncTask(noteDAO).execute(task)
     }
@@ -74,6 +79,18 @@ class TaskRepository(private val noteDAO: TaskDAO) {
         override fun doInBackground(vararg params: Task?): Boolean {
             return try {
                 noteDAOTask.delete(params[0]!!)
+                true
+            } catch (e: Exception) {
+                e.printStackTrace()
+                false
+            }
+        }
+    }
+    private class DeleteAllAsyncTask(val noteDAOTask: TaskDAO) :
+        AsyncTask<Task, Void, Boolean>() {
+        override fun doInBackground(vararg params: Task?): Boolean {
+            return try {
+                noteDAOTask.deleteAll()
                 true
             } catch (e: Exception) {
                 e.printStackTrace()

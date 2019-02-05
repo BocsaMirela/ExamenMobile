@@ -29,7 +29,9 @@ class TasksViewModel(application: Application) : ViewModel() {
         return noteManager.getAllTasksServer()
     }
 
-
+    fun deleteAllDB(): Boolean {
+        return noteRepository.deleteAllTask()
+    }
 
     fun updateTaskServer(task: Task): Call<Task> {
         return noteManager.updateTaskServer(task)

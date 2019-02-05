@@ -34,6 +34,8 @@ import retrofit2.Callback
 import retrofit2.Response
 import java.net.URI
 import java.net.URISyntaxException
+import java.util.*
+import kotlin.collections.ArrayList
 
 
 class MainActivity : AppCompatActivity(), OnClickInterface {
@@ -45,6 +47,7 @@ class MainActivity : AppCompatActivity(), OnClickInterface {
     private var mWebSocketClient: WebSocketClient? = null
     private var more: Boolean = true
     private val UPDATED = 1
+    private val unSentList = ArrayList<Task>()
 
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -52,6 +55,7 @@ class MainActivity : AppCompatActivity(), OnClickInterface {
         setContentView(R.layout.activity_main)
         initialize()
         connectWebSocket()
+        saveEvery20SEC()
     }
 
     private fun initialize() {
@@ -111,10 +115,12 @@ class MainActivity : AppCompatActivity(), OnClickInterface {
         taskViewModel.getTasksFromServer().enqueue(object : Callback<List<Task>> {
             override fun onResponse(call: Call<List<Task>>, response: Response<List<Task>>) {
                 response.body()?.also {
-                    val items = adapter.task as ArrayList
+
+                    taskViewModel.deleteAllDB()
+
                     it.forEach { task -> taskViewModel.addTask(task) }
 
-                    val itemsOfViewModel = getTaskViewModel(items)
+                    val itemsOfViewModel = getTaskViewModel(it)
                     taskViewModel.items.value = itemsOfViewModel
                 }
             }
@@ -197,44 +203,58 @@ class MainActivity : AppCompatActivity(), OnClickInterface {
             if (resultCode == Activity.RESULT_OK) {
                 data?.apply {
                     val task = data.getParcelableExtra<Task>("item")
+                    val ok = data.getBooleanExtra("ok", true)
                     taskViewModel.updateTask(task)
 
-                    taskViewModel.updateTaskServer(task).enqueue(object : Callback<Task> {
-                        override fun onFailure(call: Call<Task>, t: Throwable) {
-                            val items = adapter.task as ArrayList
-                            val ind = items.indexOf(task)
-                            items.remove(task)
-                            items.add(ind, task)
+                    val items = adapter.getTasksList() as ArrayList
+                    var taskVM = TaskViewModel(task, "")
+                    val ind = items.indexOf(taskVM)
+                    if (!ok) {
+                        taskVM = TaskViewModel(task, "NOT SENT TO SERVER YEST")
+                        unSentList.add(taskVM.task)
+                    }
+                    items.remove(taskVM)
+                    items.add(ind, taskVM)
 
-                            val itemsViewModel = getTaskViewModel(items) as ArrayList
-                            val taskVM=TaskViewModel(task,"NOT SENT TO SERVER YEST")
-                            val ind2=itemsViewModel.indexOf(taskVM)
-                            itemsViewModel.remove(taskVM)
-                            itemsViewModel.add(ind2,taskVM)
-
-                            taskViewModel.items.value =itemsViewModel
-                        }
-
-                        override fun onResponse(call: Call<Task>, response: Response<Task>) {
-//                            when {
-//                                response.code() == 200 -> {
-//                                    task = response.body()
-//                                    updateListWhenConflict(task, "", "")
-//                                }
-//                                response.code() == 409 -> {
-////                                    val json = JSONObject(response.body().toString())
-//                                    val txt = "Conflict value"
-//                                    updateListWhenConflict(task, txt, "CONFLICT")
-//                                }
-//                                response.code() == 412 -> updateListWhenConflict(task, "", "DELETED")
-//                            }
-                        }
-                    })
-
+                    taskViewModel.items.value = items
 
                 }
             }
         }
 
+    }
+
+    private fun saveEvery20SEC() {
+        Timer().scheduleAtFixedRate(object : TimerTask() {
+            override fun run() {
+               unSentList.forEach{task-> saveData(task)}
+            }
+        }, 0, 6000)//put here time 1000 milliseconds=1 second    }
+    }
+
+    private fun saveData(task:Task) {
+        taskViewModel.updateTaskServer(task).enqueue(object : Callback<Task> {
+            override fun onFailure(call: Call<Task>, t: Throwable) {
+
+            }
+            override fun onResponse(call: Call<Task>, response: Response<Task>) {
+                when {
+                    response.code() == 200 -> {
+                        unSentList.remove(task)
+                        val taskR = response.body()!!
+                        val items = adapter.getTasksList() as ArrayList
+                        var taskVM = TaskViewModel(task, "")
+                        val ind = items.indexOf(taskVM)
+                        items.remove(taskVM)
+                        items.add(ind, taskVM)
+                        taskViewModel.items.value = items
+
+                    }
+                    response.code() == 409 -> {
+
+                    }
+                }
+            }
+        })
     }
 }

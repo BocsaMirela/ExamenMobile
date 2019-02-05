@@ -20,4 +20,7 @@ interface TaskDAO {
     @Update
     fun update(chocolate: Task)
 
+    @Query("DELETE FROM tasks")
+    fun deleteAll()
+
 }
