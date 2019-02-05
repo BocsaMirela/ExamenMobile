@@ -10,9 +10,9 @@ import java.util.concurrent.TimeUnit
 
 class RetrofitFactory {
     private val okHttpClientBuilder = OkHttpClient.Builder()
-        .connectTimeout(6000, TimeUnit.MILLISECONDS)
-        .writeTimeout(6000, TimeUnit.MILLISECONDS)
-        .readTimeout(6000, TimeUnit.MILLISECONDS).addInterceptor { chain ->
+        .connectTimeout(3000, TimeUnit.MILLISECONDS)
+        .writeTimeout(3000, TimeUnit.MILLISECONDS)
+        .readTimeout(3000, TimeUnit.MILLISECONDS).addInterceptor { chain ->
             val newRequest = chain.request().newBuilder()
                 .build()
             chain.proceed(newRequest)

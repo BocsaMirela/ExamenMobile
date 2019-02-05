@@ -31,8 +31,5 @@ class TaskManager {
         return api.updateTask(event.id, event)
     }
 
-    fun check(): Call<String> {
-        return api.check()
-    }
 
 }

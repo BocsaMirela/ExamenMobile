@@ -44,10 +44,8 @@ class TaskAdapter : RecyclerView.Adapter<TaskAdapter.ViewHolder>() {
     override fun onBindViewHolder(viewHolder: ViewHolder, p: Int) {
         val event = taskViewModelsList[p]
         viewHolder.txtDescription.text = event.task.text
-        viewHolder.txtStatus.text = event.task.status
-        viewHolder.txtData.text = formatDate(Date(event.task.updated))
-        viewHolder.txtConflict.text = event.conflict
         viewHolder.txtVersion.text = "Version: " + event.task.version.toString()
+        viewHolder.txtNotSent.text = event.status
 
     }
 
@@ -55,10 +53,8 @@ class TaskAdapter : RecyclerView.Adapter<TaskAdapter.ViewHolder>() {
 
 
         var txtDescription: TextView = view.findViewById(R.id.chocolateDescription)
-        var txtData: TextView = view.findViewById(R.id.chocolateData)
-        var txtStatus: TextView = view.findViewById(R.id.chocolateStatus)
-        var txtConflict: TextView = view.findViewById(R.id.chocolateResult)
         var txtVersion: TextView = view.findViewById(R.id.chocolateVersion)
+        var txtNotSent: TextView = view.findViewById(R.id.chocolateResult)
 
         init {
             view.setOnClickListener(this)
@@ -67,22 +63,6 @@ class TaskAdapter : RecyclerView.Adapter<TaskAdapter.ViewHolder>() {
         override fun onClick(v: View?) {
             clickListener?.onClick(view, adapterPosition); }
 
-    }
-
-    private fun formatDate(date: Date): String {
-        val fmt = SimpleDateFormat("dd-MM-yyyy HH:mm", Locale.getDefault())
-//        return fmt.parse(string)
-        return fmt.format(date)
-    }
-
-    fun removeItem(item: Task) {
-        (taskViewModelsList as ArrayList<Task>).remove(item)
-        notifyDataSetChanged()
-    }
-
-    fun insertItem(item: Task) {
-        (taskViewModelsList as ArrayList<Task>).add(item)
-        notifyDataSetChanged()
     }
 
     override fun getItemViewType(position: Int): Int {

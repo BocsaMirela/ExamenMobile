@@ -39,6 +39,7 @@
             app:layout_constraintStart_toStartOf="@id/chocolateDescription"
             app:layout_constraintTop_toBottomOf="@id/chocolateDescription"
             tools:text="31-11-2019"
+            android:visibility="gone"
             />
 
     <TextView
@@ -54,6 +55,7 @@
             app:layout_constraintStart_toStartOf="@id/chocolateDescription"
             app:layout_constraintTop_toBottomOf="@id/chocolateData"
             tools:text="ACtive"
+            android:visibility="gone"
     />
     <TextView
             android:id="@+id/chocolateVersion"

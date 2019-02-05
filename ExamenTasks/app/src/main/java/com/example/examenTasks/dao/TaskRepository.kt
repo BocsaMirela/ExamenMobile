@@ -37,7 +37,7 @@ class TaskRepository(private val noteDAO: TaskDAO) {
     private class LoadAsyncTask(val noteDAOTask: TaskDAO) :
         AsyncTask<Void, Void, List<Task>>() {
         override fun doInBackground(vararg params: Void?): List<Task> {
-            val choco = noteDAOTask.getTasks("active")
+            val choco = noteDAOTask.getTasks()
             Log.e(" from db all ", choco.size.toString())
             return choco
         }
